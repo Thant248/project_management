@@ -1,9 +1,10 @@
-import Pagination from "@/Components/Pagination";
 import SelectInput from "@/Components/SelectInput";
-import TextInput from "@/Components/TextInput";
 import TableHeading from "@/Components/TableHeading";
-import { TASK_STATUS_CLASS_MAP, TASK_STATUS_TEXT_MAP } from "@/constant.jsx";
+import TextInput from "@/Components/TextInput";
+import { TASK_PRIORITY_TEXT_MAP, TASK_STATUS_CLASS_MAP } from "@/constant";
 import { Link, router } from "@inertiajs/react";
+import Pagination from "@/Components/Pagination";
+
 
 export default function TasksTable({
   tasks,
@@ -166,7 +167,7 @@ export default function TasksTable({
                       TASK_STATUS_CLASS_MAP[task.status]
                     }
                   >
-                    {TASK_STATUS_TEXT_MAP[task.status]}
+                    {TASK_PRIORITY_TEXT_MAP[task.status]}
                   </span>
                 </td>
                 <td className="px-3 py-2 text-nowrap">{task.created_at}</td>
