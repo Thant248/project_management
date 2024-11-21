@@ -26,8 +26,8 @@ class ProjectResource extends JsonResource
             'status' => $this->status,
             'image_path' => $this->image_path && !(str_starts_with($this->image_path, 'http')) ?
                 Storage::url($this->image_path) : $this->image_path,
-            'created_by' => new UserResource($this->createdBy),
-            'updated_by' => new UserResource($this->updatedBy),
+            'createdBy' => new UserResource($this->createdBy),
+            'updatedBy' => new UserResource($this->updatedBy),
         ];
     }
 }

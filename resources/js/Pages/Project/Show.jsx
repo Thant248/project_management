@@ -48,7 +48,7 @@ export default function Show({auth, project, success, tasks, queryParams}) {
                     </div>
                     <div className="mt-4">
                       <label className="font-bold text-lg">Created By</label>
-                      <p className="mt-1">{project.created_by.name}</p>
+                      <p className="mt-1">{project.createdBy.name}</p>
                     </div>
                   </div>
                 <div>
@@ -62,7 +62,7 @@ export default function Show({auth, project, success, tasks, queryParams}) {
                   </div>
                   <div className="mt-4">
                     <label className="font-bold text-lg">Updated By</label>
-                    <p className="mt-1">{project.updated_by.name}</p>
+                    <p className="mt-1">{project.updatedBy.name}</p>
                   </div>
                 </div>
                 </div>

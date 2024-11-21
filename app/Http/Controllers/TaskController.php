@@ -5,83 +5,156 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Resources\ProjectResource;
 use App\Http\Resources\TaskResource;
+use App\Http\Resources\UserResource;
+use App\Models\Project;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage as FacadesStorage;
+
 
 class TaskController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        $query = Task::query();
+  /**
+   * Display a listing of the resource.
+   */
+  public function index()
+  {
+    $query = Task::query();
 
-        $sortFileds = request("sort_field", "created_at");
+    $sortFileds = request("sort_field", "created_at");
+    $sortDirection = request("sort_direction", "desc");
+
+    if (request("name")) {
+      $query->where("name", "like", "%" . request("name") . "%");
+    }
+
+    if (request("status")) {
+      $query->where("status", request("status"));
+    }
+
+    $tasks = $query->orderBy($sortFileds, $sortDirection)
+      ->paginate(10)
+      ->onEachSide(1);
+
+    return inertia("Task/Index", [
+      'tasks' => TaskResource::collection($tasks),
+      'queryParams' => request()->query() ?: null,
+    ]);
+  }
+
+  /**
+   * Show the form for creating a new resource.
+   */
+  public function create()
+  {
+    $project = Project::query()->orderBy('name', 'asc')->get();
+    $user = User::query()->orderBy('name', 'asc')->get();
+    return inertia("Task/Create", [
+      'project' => ProjectResource::collection($project),
+      'user' => UserResource::collection($user),
+    ]);
+  }
+
+  /**
+   * Store a newly created resource in storage.
+   */
+  public function store(StoreTaskRequest $request)
+  {
+    $data = $request->validated();
+        /** @var $image \Illuminate\Http\UploadedFile */
+        $image = $data['image'] ?? null;
+        $data['created_by'] = Auth::id();
+        $data['updated_by'] = Auth::id();
+        if ($image) {
+            $data['image_path'] = $image->store('tasks/' . Str::random(), 'public');
+        }
+    Task::create($data);
+    return to_route("task.index")->with("message", "Task Created Successfully");
+  }
+
+  /**
+   * Display the specified resource.
+   */
+  public function show(Task $task)
+  {
+    return inertia('Task/Show', [
+        'task' => new TaskResource($task),
+    ]);
+  }
+
+  /**
+   * Show the form for editing the specified resource.
+   */
+  public function edit(Task $task)
+  {
+    $user = User::query()->orderBy('name', direction: 'asc')->get();
+    $project = Project::query()->orderBy('name', 'asc')->get();
+
+    return inertia("Task/Edit", [
+      'task' => new TaskResource($task),
+      'users' => UserResource::collection($user),
+      'projects' => ProjectResource::collection($project)
+    ]);
+  }
+
+  /**
+   * Update the specified resource in storage.
+   */
+  public function update(UpdateTaskRequest $request, Task $task)
+  {
+    $data = $request->validated();
+    $image = $data['image'] ?? null;
+    $data['updated_by'] = Auth::id();
+
+    if ($image) {
+      if($task->image_path){
+        FacadesStorage::disk('public')->deleteDirectory(dirname(($task->image_path)));
+      }
+      $data['image_path'] = $image->store('tasks/' . Str::random(), 'public');
+    }
+    $task->update($data); 
+    return to_route('task.index')->with('success', 'Task was updated');
+  }
+
+  /**
+   * Remove the specified resource from storage.
+   */
+  public function destroy(Task $task)
+  {
+    $name = $task->name;
+    $task->delete();
+    if($task->image_path){
+      FacadesStorage::disk('public')->deleteDirectory(dirname($task->image_path));
+    }
+    return to_route(('task.index'))->with('success', "$name was deleted");
+  }
+
+  public function myTasks()
+    {
+        $user = auth()->user();
+        $query = Task::query()->where('assigned_user_id', $user->id);
+
+        $sortField = request("sort_field", 'created_at');
         $sortDirection = request("sort_direction", "desc");
 
-        if(request("name")){
-            $query->where("name","like","%".request("name")."%");
+        if (request("name")) {
+            $query->where("name", "like", "%" . request("name") . "%");
         }
-        
-        if(request("status")){
-            $query->where("status",request("status"));
+        if (request("status")) {
+            $query->where("status", request("status"));
         }
 
-        $tasks = $query->orderBy($sortFileds, $sortDirection)
-                          ->paginate(10)
-                          ->onEachSide(1);
+        $tasks = $query->orderBy($sortField, $sortDirection)
+            ->paginate(10)
+            ->onEachSide(1);
 
-        return inertia("Task/Index",[
-            'tasks' => TaskResource::collection($tasks),
+        return inertia("Task/Index", [
+            "tasks" => TaskResource::collection($tasks),
             'queryParams' => request()->query() ?: null,
+            'success' => session('success'),
         ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreTaskRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Task $task)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Task $task)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateTaskRequest $request, Task $task)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Task $task)
-    {
-        //
     }
 }
