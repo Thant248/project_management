@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\DashBoardController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\userController;
+use App\Mail\InvitationMail;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -20,6 +22,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('task/my-tasks', [TaskController::class, 'myTasks'])->name('task.my-tasks');
     Route::resource('task', TaskController::class);
     Route::resource('user', userController::class);
+    Route::get('invite', [InvitationController::class, 'index'])->name('invite.index');
+    Route::post('invite', [InvitationController::class, 'store'])->name('invite.store');
 });
 
 Route::middleware('auth')->group(function () {
