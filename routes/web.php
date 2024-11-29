@@ -4,6 +4,7 @@ use App\Http\Controllers\DashBoardController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\QRCodeController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\userController;
 use App\Mail\InvitationMail;
@@ -24,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('user', userController::class);
     Route::get('invite', [InvitationController::class, 'index'])->name('invite.index');
     Route::post('invite', [InvitationController::class, 'store'])->name('invite.store');
+    Route::get('user-qrcode', [QRCodeController::class, 'index'])->name('qr.index');
 });
 
 Route::middleware('auth')->group(function () {

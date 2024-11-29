@@ -60,6 +60,12 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                   Invitation
                                 </NavLink>
+                                <NavLink
+                                  href={route('qr.index')}
+                                  active={route().current('qr.index')}
+                                >
+                                  User Data
+                                </NavLink>
                             </div>
                         </div>
 
